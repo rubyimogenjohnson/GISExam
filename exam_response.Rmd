@@ -1,0 +1,796 @@
+---
+title: "CASA005 Exam"
+author: Ruby Johnson
+Student number: 18071426
+date: "`r format(Sys.time(), '%X, %d %B, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+---
+
+# Originality declaration
+
+I, ***Ruby Johnson*** , confirm that the work presented in this assessment is my own. Where information has been derived from other sources, I confirm that this has been indicated in the work.
+
+date: `r format(Sys.time(), '%d %B, %Y')`
+
+------------------------------------------------------------------------
+
+# **Question 3: Adelaide Green Space Accessibility**
+
+*Investigating the relationship between green space accessibility and socio-economic factors in Adelaide, Australia.*
+
+------------------------------------------------------------------------
+
+### **1. Initial Project Scope**
+
+Access to green space is a key element of healthy living with urban locales (Hoffimann et al, 2017). The benefits are plentiful; from increased physical activity, improving health both mentally and physically, to improved social cohesion and bettered immune function for younger populations (NASA, 2019). As such, equitable access to green space is of interest for local governments. However, access is not always equal.
+
+Found throughout various studies, there is a nexus of socio-economic factors that can influence, and ultimately, hinder access to good quality green spaces. As per the "deprivation-amplification" hypothesis, those that live within deprivation are also those that suffer from poorer health (Macintyre, 2007). As such, the need for access to green spaces is amplified. Despite this, these populations are often resource poor; whether it be time, access to transport or living within locations without green space, all these factors compound to create inequitable access to good quality green spaces.
+
+Multiple studies have found conflicting results in varying contexts; some report that minority and areas of low socioeconomic status have less safe and quality green spaces (Crawford, 2008). Conversely, others have found that lower socio-economic neighbourhoods have no effect on actual access to green space, yet the quantity and quality of the green spaces are considerably lower (Boone, 2009). Juxtaposed to this, Engelberg (2016) found that access to green spaces was equitable regardless of socio-economic factors, with Ruijsbroek (2017) even finding access was better for those in lower socio-economic areas.
+
+These convoluted results prove the importance of uncovering the spatial trends of access to green spaces, as the lack of unified conclusions means none can be applied to a different context. Within Adelaide, access to green spaces is recorded as the greatest disparity throughout Australia. Affluent areas have 20% of all green spaces, whilst there is only 12% in the least affluent (Gibson, 2021). Considering that the City of Adelaide aims to fulfil the UN's Sustainable Development, namely the target of "[providing] universal access to safe, inclusive and accessible, green and public spaces." (UN, 2018), this disparity must be imminently solved.
+
+Considering the above, this report aims to provide an overview between the relationship between deprivation and green spaces throughout Adelaide. This will be done through using 2021 Census data, collected from the Australian Bureau of Statistics, in tandem with Landsat 8 Collection 2 Surface Reflectance Data. By using vegetation indicies as a measure of green space, the relationship will be evaluated. However, to assume that NDVI is a direct representation of green space is a limiting factor of this work, and does not consider the different elements affecting accessibility, such as transport links.
+
+After reducing the data to the boundaries of Adelaide, the sole metric of Median Weekly Income (for a household) will be used as a proxy for deprivation (variable name: Median_tot_hhd_inc_weekly in CSV file G02). Whilst the use of one metric obscures the complexity of socio-economic factors, the use of income is not uncommon (Jerrim, 2020). Yet, it also excludes racial bias of socio-economic factors. In addition, using the median value obscures the true clustering of data. Within Australia, income deprivation is set at a weekly threshold; if a household earns less than \$1,091 per week, they are classed as deprived (Melbourne Institute, 2021). In Adelaide, seven SA2s met this criterion. It should be noted that this threshold is based on a nuclear family and cannot be universally applied. However, considering the limited scope of this work, the simple classification of deprivation will be suitable, and in turn, encourages future research.
+
+Landsat 8 data was collected via the USGS Earth Explorer. After setting a temporal constraint of the year 2021, and cloud cover to be below 10%, the image code LC09_L2SP_097084_20211230_20220121_02_T1_SR was chosen due to having 0% cloud cover. The image was taken on the 30th December, 2021. In here lies another limitation of analysis; to use a single remote sensing image neglects temporal difference. The image chosen is from December, classed as the summer in Australia. With reduced rainfall, it is possible that the quality of green spaces was reduced, and thus not picked up through later calculations. An improved approach would be to collect data from a different tool, such as Google Earth Engine, to create a mean image of values over a time span.
+
+Thereafter, indices using the Landsat data was calculated. Whilst overview indices, such as a true colour image, were calculated, analysis focuses on the Normalised Difference Vegetation Indices. Raster data was masked and clipped to the boundaries of Adelaide, and bands 4 and 5, red and NIR respectively, were used for analysis to create NDVI values (Calculation 1)
+
+$$ NDVI =  \frac{NIR-Red}{NIR + Red}$$
+
+Based on variations in the intensity of NIR and red light, NDVI gauges the health and growth of the canopy through a scale of 0 to 1 (Bera, 2020; Karnieli, 2010). Plants are extremely sensitive to red light producing metatoplin as a result (Knipling, 1970; Xue, 2017). Metatoplin preserves the process of photosynthesis, protects the health of plants, and stops the degradation of chlorophyll (Runkle, 2016). NIR is reflected by plant's mesophilic cell structure (Pettorelli, 2005). Thus, a healthy plant structure is indicated by a higher reflectance of NIR and absorption of red light. However, NDVI is a relatively limited measure, as it obscured variation in vegetation and canopy cover, and can be greatly affected by atmospheric effects (Bhandari, 2012).
+
+The NDVI values were then categorised; NDVI values between 0 and 0.2 are considered to be bare soil, whilst values above 0.8 can be tropical rain forest (NASA, 2000). In a study study of green spaces, Lahoti et al (2019) classified NDVI values between 0.2 and 0.5 to be that of parks. Considering green space within cities is often provided in the form of parks, this assumption was adopted for analysis and used to calculate the percentage cover of parks within each SA2. However, this is a key assumption of this work, and could incorrectly assume that an NDVI value corresponds to a green space. Regardless, considering the academic consensus, this assumption was adopted. This will allow the NDVI to both a measure of quality of green spaces, and actual provision of green spaces.
+
+Through this calculation, the mean value of NDVI and the resulting percentage of park cover for each SA2 was extracted. Thereafter, the values for both metrics were plotted using choropleth maps to highlight the spatial trends through a visual aide. The theme of Fisher Jenks was chosen as breaks, due to its ability to find natural breaks in data and thus is more likely to display spatial patterns (Moffitt, 2019). Following this, regression and correlation models were calculated. The statistical test of spearman's correlation was chosen, due to the skewed income data (later shown). Finally, a bivariate map was created to highlight the relationship between income and park cover. Through these considered methods, the equitable access to green spaces will be discussed and reflected upon.
+
+Before doing so, the geographic and temporal aspects of data must be considered. All data will be collected on, or aggregated to, Statistical Areas Level 2 within the boundaries of Adelaide. This level of analysis provides both a small enough scale to overcome issues of Modifiable Areal Unit Problem and Ecological Fallacy, whilst still representing a big enough population for suitable analysis. Within Adelaide, there are 108 SA2s. Populations have an average of 10,000 throughout Australia (ABS, 2021). In relation to temporal basis of analysis, all data is collected from 2021, as this was the most recent Census year. The temporal continuity between data sources is imperative for drawing meaningful conclusions.
+
+#### **1.2 Research Questions**
+
+1.  What is the relationship between NDVI, and resulting park cover, and income deprivation in Adelaide, Australia?
+
+#### **1.3 Workflow**
+
+This report will be structured as follows:
+
+1.  Project scope
+2.  Setting up
+3.  Data wrangling and Reflection
+4.  Analysis
+5.  Conclusion and Critical Reflections
+6.  References
+
+------------------------------------------------------------------------
+
+### **2. Set up**
+
+#### **2.1 Packages**
+
+```{r packages}
+
+# Packages are imported in each cell block.
+
+```
+
+#### **2.2 Directory**
+
+```{r set-up}
+
+# Check directory 
+
+wd <- here::here(setwd("C:/Users/Student/OneDrive/2016-2017/Desktop/GISExam")
+)
+wd <- getwd()
+print(paste0("Current working dir: ", wd))
+data <- ("./data")
+```
+
+#### **2.3 Functions**
+
+The functions below were created to aide raster insight and calculation.
+
+```{r functions}
+
+# Info on raster stacks
+
+rasterinfo <- function(rasterstack){
+print(paste0("Projection is: ", crs(rasterstack)))
+print(paste0("Extent is: ", extent(rasterstack)))
+print(paste0("There are ", ncell(rasterstack), " cells"))
+print(paste0("Rows, columns any layers: ", dim(rasterstack) ))
+print(paste0("There are ", nlayers(rasterstack), " layers"))
+print(paste0("Resolution is: ", res(rasterstack)))
+print(paste0("Class is: ", class(rasterstack)))
+}
+
+# Calculate raster indices
+
+library("ggplot2")
+
+
+NDVIFunc <- function(NIR, RED) { # NDVI Func
+  NDVI <- (NIR - RED) / (NIR + RED) # BANDS
+  return(NDVI)
+}
+
+EVIFunc <- function(NIR, RED, BLUE) { # EVI
+ EVI <- 2.5*((NIR-RED)/((NIR+6)*(RED-7.5)*(BLUE+1)))
+ return(EVI)
+}
+
+NDBIFunc <- function(SWIR, NIR){ # NDBI
+  NDBI <- ((SWIR-NIR)/(SWIR+NIR))
+}
+
+plot_indicies <- function(NDVI, EVI, NDBI) {  # OVERVIEW PLOT
+  par(mfrow=c(1,2))
+  
+  ndvi_plot <- NDVI %>%
+  plot(.,col = rev(terrain.colors(10)), main = "Landsat Normalised Vegetation Difference Index")
+  ndvi_hist <- NDVI %>%
+  hist(., breaks = 40, main = "NDVI Histogram", xlim = c(-1,1))
+  
+  par(mfrow=c(1,2))
+  veg <- NDVI %>%
+  reclassify(., cbind(-Inf, 0.3:0.5, NA)) # Reclassifc to parks
+  veg %>%
+  plot(.,main = 'Possible Veg cover')
+ 
+  veg_hist <- veg %>%
+  hist(., breaks = 40, main = "Veg Histogram", xlim = c(-1,1))
+    veg_plot <- veg %>%
+
+  par(mfrow=c(1,2))
+  evi_plot <- EVI %>%
+  plot(.,main = 'EVI')
+  evi_hist <- EVI %>%
+  hist(., breaks = 40, main = "EVI Histogram", xlim = c(-1,1))
+  
+  par(mfrow=c(1,2))
+  NDBI_plot <- NDBI %>%
+  plot(.,main = 'NDBI')
+  NDBI_hist <- NDBI %>%
+  hist(., breaks = 40, main = "NDBI Histogram", xlim = c(-1,1))
+  
+  
+}
+```
+
+------------------------------------------------------------------------
+
+### **3. Data Loading and Wrangling**
+
+#### **3.1 Data Sources**
+
+Data sources and variables are as follows;
+
+1.  [SA2 Census Data](https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files) - Table GO2, Median_tot_hhd_inc_weekly
+2.  [SA2 Boundaries](https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files)
+3.  [Landsat 8 surface reflectance imagery](https://earthexplorer.usgs.gov/) - Image ID LC09_L2SP_097084_20211230_20220121_02_T1
+
+#### **3.2 Read in Data**
+
+```{r non-spatial-data-read-in}
+
+library(tidyverse)
+library(janitor)
+
+income <- read_csv(here::here("data/2021 Census GCP Statistical Area 2 for SA/2021Census_G02_SA_SA2.csv")) %>% 
+  dplyr::select(SA2_CODE_2021, Median_tot_hhd_inc_weekly) %>% # select columns
+  rename(., median_weekly_income = Median_tot_hhd_inc_weekly) %>% # change name
+  clean_names() # clean names
+                 
+```
+
+```{r spatial-data--read-in}
+
+# Read in SA2 Shape
+
+library(sf)
+library(dplyr)
+library(sf)
+library(stringr)
+
+sa2 <- st_read(here::here("data/SA2_2021_AUST_GDA2020.shp")) %>% 
+  filter(str_detect(GCC_NAME21, "Adelaide")) %>% # filter SA2 to those with Adelaide in the boundary 
+    dplyr::select(SA2_CODE21, SA2_NAME21, geometry) %>% # select column
+    clean_names() # clean names
+
+```
+
+```{r raster-data-read-in}
+
+library(fs)
+library(sf)
+library(tidyverse)
+library(raster)
+
+landsat <- dir_info(here::here("Data", "LC09_L2SP_097084_20211230_20220121_02_T1")) %>% # detect image iD
+  dplyr::filter(str_detect(path, "[B123456790].TIF")) %>% # Detect all bands - these are all read in as they are used in overview of data
+  dplyr::select(path) %>% # select
+  pull() %>%
+  as.character() %>%
+  raster::stack() # put into raster stack
+
+```
+
+#### **3.3 Wrangling Data**
+
+```{r wrangling-vector-data}
+
+# Merge the SA2 and census data together
+
+# Firstly set column types to the same - currently SA2 codes are CHR or NUM
+
+sa2$sa2_code21 <- as.numeric(sa2$sa2_code21)
+
+# Join
+
+sa2_income <- sa2 %>%
+   left_join(.,
+             income,
+             by= c("sa2_code21" = "sa2_code_2021"))
+
+# Check it worked
+
+if(nrow(sa2)==nrow(sa2_income)){
+  print("All SA2 regions have been maintained")
+} else {
+    print("Some SA2 regions are missing")
+}
+
+# Remove 0 values
+
+sa2_income <- filter(sa2_income, median_weekly_income>0)
+
+
+
+# Filter Adelaide city for label
+
+adelaide <- st_read(here::here("data/SA2_2021_AUST_GDA2020.shp")) %>% 
+  filter(str_detect(SA3_NAME21, "Adelaide City")) %>% # filter SA2 to those with Adelaide in the boundary 
+  dplyr::select(SA2_NAME21, geometry) #%>%  # select column
+
+# Select just first row as there seems to be two rows with same SA3 name
+  
+adelaide <- adelaide %>%
+             slice(1)
+
+crs_raster <- st_crs(landsat)$proj4string
+adelaide <- adelaide %>% 
+  st_transform(., crs_raster)
+
+
+```
+
+```{r wrangling-raster-data}
+
+# First check that CRS match...
+
+if(st_crs(sa2_income)$proj4string==st_crs(landsat)$proj4string){
+  print("All spatial data is set to the same CRS")
+  } else {
+    print("CRS string is not the same")
+    print(paste0("CRS of raster is: ", st_crs(landsat)$proj4string))
+    print(paste0("CRS of vector is: ", st_crs(sa2_income)$proj4string))
+  }
+
+# Easier to change crs of vector, as had issues with project raster
+
+crs_raster <- st_crs(landsat)$proj4string
+sa2_income <- sa2_income %>% 
+  st_transform(., crs_raster)
+
+# Check it worked
+
+if(st_crs(sa2_income)$proj4string==st_crs(landsat)$proj4string){
+  print("All spatial data is set to the same CRS")
+  } else {
+    print("CRS string is not the same")
+    print(paste0("CRS of raster is: ", st_crs(landsat)$proj4string))
+    print(paste0("CRS of vector is: ", st_crs(sa2_income)$proj4string))
+  }
+
+# Now to crop and mask the raster
+
+library(dplyr)  
+library(raster)
+
+
+landsatmasked <- landsat %>%
+  raster::crop(.,sa2_income) %>%
+  raster::mask(.,  sa2_income)
+
+# Lets look at the stack
+
+rasterinfo(landsatmasked)
+
+# Ok it has made a raster brick... time to do it again through indidually masking each layer
+
+a <- raster::crop(landsat$LC09_L2SP_097084_20211230_20220121_02_T1_SR_B2, sa2_income)
+a <- raster::mask(a, sa2_income)
+
+b <- raster::crop(landsat$LC09_L2SP_097084_20211230_20220121_02_T1_SR_B3, sa2_income)
+b <- raster::mask(b, sa2_income)
+
+c <- raster::crop(landsat$LC09_L2SP_097084_20211230_20220121_02_T1_SR_B4, sa2_income)
+c <- raster::mask(c, sa2_income)
+
+d <- raster::crop(landsat$LC09_L2SP_097084_20211230_20220121_02_T1_SR_B5, sa2_income)
+d <- raster::mask(d, sa2_income)
+
+e <- raster::crop(landsat$LC09_L2SP_097084_20211230_20220121_02_T1_SR_B6, sa2_income)
+e <- raster::mask(e, sa2_income)
+
+f <- raster::crop(landsat$LC09_L2SP_097084_20211230_20220121_02_T1_SR_B7, sa2_income)
+f <- raster::mask(f, sa2_income)
+
+
+landsatmasked <-stack(a, b, c, d, e, f)
+names(landsatmasked) <-c('blue', 'green', 'red', 'NIR', 'SWIR1', 'SWIR2') # Name bands
+
+rasterinfo(landsatmasked) # Look at info
+
+
+
+```
+
+#### **3.5 Preparation for Analysis**
+
+Now the data is all read in, it will undergo further preparation before analysis.
+
+```{r prep-income}
+
+# To further understand who is in deprivation, lets create a encoder for income deprivation 
+# This is set on the benchmark set by Australian Bureu of Statistics
+# This will only be used to visual prompt on maps
+
+dep_threshold <- 1091
+
+sa2_income$dep <- as.factor(ifelse(sa2_income$median_weekly_income <= dep_threshold, "dep", "not-dep")) # Put into categories
+
+```
+
+```{r prep-raster}
+
+library(raster)
+
+# Calculate indicies
+
+NDVI <- NDVIFunc(landsatmasked$NIR, landsatmasked$red)
+EVI <- EVIFunc(landsatmasked$NIR, landsatmasked$red, landsatmasked$blue)
+NDBI <- NDBIFunc(landsatmasked$SWIR1, landsatmasked$NIR)
+
+# Calculate possible parks by aforementioned threholds
+
+parks <- NDVI %>%
+  reclassify(., cbind(-Inf, 0.3:0.5, NA)) 
+
+# Aggregate mean NDVI by mean
+NDVI_mean_per_SA2 <- raster::extract(NDVI, sa2_income, na.rm=TRUE, df=TRUE, fun=mean)
+ 
+# Change ID
+
+NDVI_mean_per_SA2$sa2_code21<-sa2_income$sa2_code21
+
+# Rename
+
+NDVI_mean_per_SA2 <- rename(NDVI_mean_per_SA2, mean_ndvi = layer)
+
+# Aggregate parks by sum
+park_sum_per_SA2 <- raster::extract(parks, sa2_income, na.rm=TRUE, df=TRUE, fun=sum)
+
+# List pixels per SA2
+park_count_per_sa2 <- raster::extract(parks, sa2_income, na.rm=TRUE, df=TRUE, cellnumbers=TRUE)
+
+#count the pixels per SA2
+park_count_per_sa2_grouped <- park_count_per_sa2 %>%
+  count(ID)
+
+#add the SA2 ID to the urban area
+park_sum_per_SA2$sa2_code21<-sa2_income$sa2_code21
+
+#add the LSOA ID to the number of cells
+park_count_per_sa2_grouped$sa2_code21<-sa2_income$sa2_code21
+
+# Join
+
+parks_sa2 <- park_sum_per_SA2 %>%
+  left_join(.,
+            park_count_per_sa2_grouped,
+            by="sa2_code21")
+
+parks_sa2_filter <- parks_sa2 %>% 
+  dplyr::rename(park_count=layer, 
+                sa2_cells=n) %>%
+  dplyr::select(park_count, sa2_cells, sa2_code21)%>%
+  dplyr::mutate(percent_park=park_count/sa2_cells*100) # Work out % cover
+
+# Join parks and NDVI to SA2 INCOME
+
+sa2_income_parks <- sa2_income %>% 
+  left_join(.,
+            parks_sa2_filter, 
+            by = "sa2_code21")
+
+sa2_income_parks_ndvi <- sa2_income_parks %>% 
+  left_join(.,
+            NDVI_mean_per_SA2, 
+            by = "sa2_code21")
+
+# Filter to create tidy df
+
+df <- sa2_income_parks_ndvi %>% 
+   dplyr::select(geometry, sa2_code21, median_weekly_income, percent_park, mean_ndvi)
+  
+
+```
+
+------------------------------------------------------------------------
+
+### **4. Analysis**
+
+#### **4.1 Overview**
+
+The following section will provide an overview of the three utilised metrics. After further analysis, the results of spatial visualisations and statistical tests will be discussed.
+
+#### **4.2 Brief Exploration of Data**
+
+As shown below, the median income in Adelaide widely varies, from a minimum of \$725, mean of \$1615, and maximum of \$2,326. As shown on the graph, seven SA2s fall below the country wide threshold of income deprivation, and the majority of SA2s fall below the mean weekly income. This brief overview already displays the inequality in income throughout the city.
+
+```{r non-spatial-plots}
+
+#https://r-graph-gallery.com/220-basic-ggplot2-histogram.html#binSize
+
+library(tidyverse)
+library(hrbrthemes)
+
+mean <- mean(sa2_income$median_weekly_income)
+
+# plot
+hist <- sa2_income %>%
+    ggplot(aes(x=median_weekly_income)) +
+    geom_histogram(binwidth=50, fill="#b3cde3", color="#b3cde3", alpha=0.9) +
+    geom_density(aes(y = ..density.. * (nrow(sa2_income) * 50)), colour = "#8c96c6") +
+    geom_vline(xintercept = dep_threshold, linetype="dotted", 
+                color = "#8c96c6", size=1) +
+  geom_vline(xintercept = mean, linetype="dotted", 
+                color = "#8c96c6", size=1) +
+    xlab("Median Weekly Income per SA2, Adelaide (AUS$)") +
+    ylab("Count") +
+    ggtitle("Histogram of Median Weekly Income per SA2, Adelaide")
+
+hist + annotate("text", x = dep_threshold-50, y = 7, label = "Below income deprivation threshold", size = 3, angle = 90) +
+  annotate("text", x = mean-50, y = 7, label = "Below mean for Adelaide", size = 3, angle = 90)
+
+```
+
+The below plots summarise raster calculations of NDVI, Enhanced Vegetation Index (tree canopy) and Normalized Difference Built-up Index (urban land cover). Firstly, the NDVI values are clearly concentrated in the centre of Adelaide. Despite this, they are all relatively low. The max value is 0.6899233, but the mean is 0.1924327. This is on the boundary of representing shrub and grassland, possibly due to the dry summer months. When the possible park cover is plotted, there appear to be many yet smaller areas of green space, throughout the city. However, it is also clearly concentrated within the centre of Adelaide. EVI shows little, representing the lack of healthy tree canopy. Finally, NDBI shows the density of urban land cover within the centre of the city. This prompts an interesting thought; surely, we should expect greener areas to be located on the peripheries, away from urban areas. However, it appears that green areas are within these urban surfaces, presenting an unexpected trend.
+
+```{r raster-spatial-plots}
+
+plot_indicies(NDVI, EVI, NDBI)
+
+
+```
+
+#### **4.3 Spatial Visualisations of Income, NDVI and Park Cover**
+
+The aforementioned raster trends are corroborated once NDVI is aggregated to SA2 level. The is a clear swath of high values for income, NDVI and park cover. Whilst not yet statistically proven, there is an obvious visual relationship between income and green spaces; namely, those SA2s with higher weekly incomes also have greater quality in NDVI. SA2s that fall within the income deprivation category are outlined in grey; all of these areas have similar low values of NDVI and park cover, once again corroborating the positively correlated relationship between income and access to, and quality of, green areas.
+
+```{r}
+
+# Overview of Adelaide
+
+library(tmap)
+
+tmap_mode("plot")
+
+dep <- sa2_income %>% 
+  filter(., dep == "dep")
+
+
+map1 <- tm_shape(df) +
+  tm_polygons("median_weekly_income", 
+              style="fisher", 
+              title="Median Weekly Income",
+              breaks = 10,
+              legend.hist = TRUE, 
+              palette="BuPu", 
+              border.col = "white", 
+              lwd = 1) +
+  tm_shape(dep) +
+  tm_borders(col="#464444", lwd=1.1, lty = 1) +
+  #tm_credits("Data source: Australian Bureau of Statistics. SA2s with deprivation income outined in grey.", fontface = "bold") +
+  tm_shape(adelaide)+
+  tm_dots(size=0.2, col="black")+
+  tm_text(text="SA2_NAME21", size=0.8, ymod=-0.5, col="black", fontface = "bold", shadow = TRUE)+
+  tm_compass(north = 0, 
+             type = 'arrow', 
+             show.labels =0, 
+             size = 1,
+             position = c('right','top')) +
+  tm_scale_bar(position= c("right", "bottom"), text.size = 0.5, width = 5, just = "right") +
+  tm_layout(legend.show = TRUE,
+            legend.format = list(fun = function(x) formatC(x, digits = 1, format = "f")),
+            legend.outside = TRUE, 
+            legend.outside.position = 'bottom',
+            legend.hist.width = 2,
+            legend.hist.height = 0.5,
+            legend.stack = 'horizontal',
+            legend.title.fontface = 'bold',
+            legend.text.fontface = 'bold'
+            ) +
+  tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) 
+
+map2 <- tm_shape(df) +
+  tm_polygons("mean_ndvi", 
+              style="fisher", 
+              title="Mean NDVI Value per SA2",
+              breaks = 10,
+              legend.hist = TRUE, 
+              palette="YlGn", 
+              border.col = "white", 
+              lwd = 1) +
+  tm_shape(dep) +
+  tm_borders(col="#464444", lwd=1.1, lty = 1) +
+    tm_compass(north = 0, 
+             type = 'arrow', 
+             show.labels =0, 
+             size = 1,
+             position = c('right','top')) +
+  tm_scale_bar(position= c("right", "bottom"), text.size = 0.5, width = 5, just = "right") +
+  tm_layout(legend.show = TRUE,
+            legend.format = list(fun = function(x) formatC(x, digits = 1, format = "f")),
+            legend.outside = TRUE, 
+            legend.outside.position = 'bottom',
+            legend.hist.width = 2,
+            legend.hist.height = 0.5,
+            legend.stack = 'horizontal',
+            legend.title.fontface = 'bold',
+            legend.text.fontface = 'bold'
+            ) +
+  tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) 
+
+map3 <- tm_shape(df) +
+  tm_polygons("percent_park", 
+              style="fisher", 
+              title="Park Cvoer per SA2 (%)",
+              breaks = 10,
+              legend.hist = TRUE, 
+              palette="YlGn", 
+              border.col = "white", 
+              lwd = 1) +
+  tm_shape(dep) +
+  tm_borders(col="#464444", lwd=1.1, lty = 1) +
+    tm_compass(north = 0, 
+             type = 'arrow', 
+             show.labels =0, 
+             size = 1,
+             position = c('right','top')) +
+  tm_scale_bar(position= c("right", "bottom"), text.size = 0.5, width = 5, just = "right") +
+  tm_layout(legend.show = TRUE,
+            legend.format = list(fun = function(x) formatC(x, digits = 1, format = "f")),
+            legend.outside = TRUE, 
+            legend.outside.position = 'bottom',
+            legend.hist.width = 2,
+            legend.hist.height = 0.5,
+            legend.stack = 'horizontal',
+            legend.title.fontface = 'bold',
+            legend.text.fontface = 'bold'
+            ) +
+  tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) 
+
+tmap_arrange(map1, map2, map3)
+
+
+```
+
+#### **4.3 Bivariate Map**
+
+To further visualise the relationship between income and park cover, the main focus of analysis due to being a proxy for green space, a bivariate map was plotted. This map, once again, illustrates that increasing income is linked to increasing park coverage. The great swath of dark green coincides with the NDBI dense areas, insinuating that these are areas of development. In contrast, the south coast of Adelaide is an area of lower income, and lower NDVI. Whilst this may be due the proximity of the coast, the trend is undeniable; areas with lower incomes have lower coverage and quality of green spaces.
+
+```{r bi-map}
+
+# code from https://cran.r-project.org/web/packages/biscale/vignettes/biscale.html
+
+# load dependencies
+library(biscale)
+library(cowplot)
+
+# create classes
+data <- bi_class(df, x = median_weekly_income, y = percent_park, style = "quantile", dim = 3)
+
+# create map
+map <- ggplot() +
+  geom_sf(data = data, mapping = aes(fill = bi_class), color = "white", size = 0.1, show.legend = FALSE) +
+  bi_scale_fill(pal = "DkCyan", dim = 3) +
+  ggtitle("Median Weekly Income and Park Cover (%) in Adeline, Australia") +
+  bi_theme() +
+  theme(plot.title = element_text(size = 10))  +
+  geom_sf_text(data=adelaide, size=2, aes(label = SA2_NAME21, hjust = 0.5, vjust = -0.5),
+               nudge_x = 0, nudge_y = 0,
+               fontface = "bold",
+             color = "white",
+             show.legend = FALSE,
+             inherit.aes = TRUE)+
+  labs(
+    title = "Median Weekly Income and Park Cover (%)", size=5,
+    x="", y="")
+ 
+  
+
+legend <- bi_legend(pal = "DkCyan",
+                    dim = 3,
+                    xlab = "Higher Income ",
+                    ylab = "Higher % Park ",
+                    size =2)
+
+# combine map with legend
+finalPlot <- ggdraw() +
+  draw_plot(map, 0, 0, 1, 1) +
+  draw_plot(legend, 0.1, 0.1, 0.2, 0.2)
+
+# plot
+
+park_box<-ggplot(data, aes(x=bi_class, y=percent_park, fill=bi_class)) +
+  geom_boxplot()+
+  scale_fill_manual(values=c("#E8E8E8", "#B4C0DB", "#6C83B6", "#B8D7BE", "#8FB2B3", "#577994", "#73AD80", "#5A9179", "#295A5A"))+
+  labs(x="Bivariate class (income, park)", 
+       y="Park Cover %")+
+  theme_light()+
+  theme(legend.position="none") 
+
+income_violin<-ggplot(data, aes(x=bi_class, y=median_weekly_income, fill=bi_class))+
+  geom_violin()+
+  scale_fill_manual(values=c("#E8E8E8", "#B4C0DB", "#6C83B6", "#B8D7BE", "#8FB2B3", "#577994", "#73AD80", "#5A9179", "#295A5A"))+
+  labs(x="", 
+       y="Income")+
+   guides(fill=guide_legend(title="Class"))+
+  theme_light()+
+  theme(legend.position="none") 
+
+
+
+side <- plot_grid(park_box, income_violin, labels=c("B","C","D"), ncol=1, nrow=2)
+
+all <- plot_grid(finalPlot, side, labels = c('A'), label_size = 12, ncol = 2,  rel_widths = c(2, 2))
+
+all
+
+
+```
+
+#### **4.4 Statistical Tests**
+
+As shown, once the data is applied to a statistical graph, an inequality of access is evident. When income increases, both the NDVI value and park coverage increases. For both, the linear models show a steep positive gradient. Moreover, both spearman correlation tests show statistically significant values (p\<0.05), with a correlation coefficient of 0.59 and 0.44 respectively. Whilst the positive correlation decreases once park coverage is considered, the results still display a statistically significant result. As such, through both spatial visualisations and statistical tests, the relationship is clear; those with lower incomes live in areas with low NDVI values, and thus low quality of green spaces. Once aggregated to park cover, the actual provision becomes lower for SA2s with low incomes.
+
+```{r statistical-plots}
+
+library(plotly)
+
+library(rstatix)
+library(broom)
+
+# Correlation test
+
+options(scipen = 999)
+
+corr_ndvi <- df %>%
+  cor_test(median_weekly_income, mean_ndvi, use = "complete.obs", method = c("spearman"))
+corr_ndvi_text <-(paste0("Spearman Correlation Coeffcient: ", round(corr_ndvi$cor, digits=2), " with a P value of ", round(corr_ndvi[5], digits=20)))
+
+corr_park <- df %>%
+  cor_test(median_weekly_income, percent_park, use = "complete.obs", method = c("spearman"))
+corr_park_text <-(paste0("Spearman Correlation Coeffcient: ", round(corr_park$cor, digits=2), " with a P value of ", round(corr_park[5], digits=20)))
+
+
+# Regression
+model_ndvi <- lm(median_weekly_income ~ mean_ndvi, data = df)
+model_ndvi <-(paste0("Regression Calculation: ", round(model_ndvi$coefficients[2], digits=2), "X + ", round(model_ndvi$coefficients[1], digits=2), "C"))
+
+NDVI_income <-ggplot(df, aes(x = median_weekly_income, y = mean_ndvi))+
+  geom_point(alpha=2, colour = "#8c96c6")+
+  labs(x = "Median Weekly Income per SA2 (AUS$)", 
+       y = "Mean NDVI value per SA2",
+       title = "Adelaide Income and NDVI relationship")+
+   geom_smooth(method='lm', se=FALSE, colour = "#b3cde3")+
+  theme_classic()+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  annotate("text", x=1000, y=0.3, label=model_ndvi, size=3) + 
+  annotate("text", x=1150, y=0.29, label=corr_ndvi_text, size=3)
+
+
+
+# interactive plot
+plotly::ggplotly(NDVI_income)
+
+# Park Correlation
+model_park <- lm(median_weekly_income ~ percent_park, data = df)
+model_park <-(paste0("Regression Calculation: ", round(model_park$coefficients[2], digits=2), "X + ", round(model_park$coefficients[1], digits=2), "C"))
+
+Park_income <-ggplot(df, aes(x = median_weekly_income, y = percent_park))+
+  geom_point(alpha=2, colour = "#8c96c6")+
+  labs(x = "Median Weekly Income per SA2 (AUS$)", 
+       y = "Park Cover per SA2 (%)",
+       title = "Adelaide Income and Park Cover")+
+   geom_smooth(method='lm', se=FALSE, colour = "#b3cde3")+
+  theme_classic()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  annotate("text", x=1000, y=9, label=model_park, size=3) +
+  annotate("text", x=1100, y=8.5, label=corr_park_text, size=3) 
+
+
+
+# interactive plot
+plotly::ggplotly(Park_income)
+
+```
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+### **6. Conclusion and Critical Reflection**
+
+Through this two-fold analysis, an adverse, yet not suppressing, trend has been uncovered. Adelaide, much like many cities worldwide, has a disparity in green spaces. Those living within SA2s with lower median weekly incomes are more likely to have lower levels of NDVI and park cover. In real-terms, this translates to poorer quality of green spaces and lower access to green areas, corroborating many other studies. The City of Adelaide should enact policy to aide these populations if they hope to reach target 7 of UN's Sustainable Development Goal 11, by increasing public transport links to green areas, or ensuring resources are allocated to maintain healthy green spaces.
+
+Whilst this overview is not without limitations, such as using just one measure of socio-economic factors, it provides an initial indication of a disadvantageous reality for Adelaide's population. However, this trend is only temporally relevant for 2021. Restrictions due to reliance on (marginally) outdated census data could mean the effectiveness of policy implemented to mitigate this trend are weakened. Yet, these weaknesses only provide further possibility for future research. Further work needs to consider an array of socio-economic factors, alongside a wider temporal scope in relation to the landsat data to overcome seasonal changes. To do so would lead to better understanding, prompting targeted and thus effective policy to ensure that the City of Adelaide creates a city with green spaces that are safe, inclusive and accessible.
+
+------------------------------------------------------------------------
+
+### **8. References**
+
+Australia's children, Material deprivation (no date) Australian Institute of Health and Welfare. Available at: <https://www.aihw.gov.au/reports/children-youth/australias-children/contents/income-finance-and-employment/material-deprivation> (Accessed: 26 August 2022).
+
+Bera, B., Saha, S. and Bhattacharjee, S. (2020) 'Estimation of Forest Canopy Cover and Forest Fragmentation Mapping Using Landsat Satellite Data of Silabati River Basin (India)', KN-Journal of Cartography and Geographic Information, 70(4), pp. 181-197.
+
+Bhandari, A., Kumar, A. and Singh, G. (2012) 'Feature extraction using Normalized Difference Vegetation Index (NDVI): A case study of Jabalpur city', Procedia technology, 6, pp. 612-621.
+
+Boone, C.G. et al. (2009) 'Parks and People: An Environmental Justice Inquiry in Baltimore, Maryland', Annals of the Association of American Geographers, 99(4), pp. 767--787. Available at: <https://doi.org/10.1080/00045600903102949>.
+
+Crawford, D. et al. (2008) 'Do features of public open spaces vary according to neighbourhood socio-economic status?', Health & Place, 14(4), pp. 889--893. Available at: <https://doi.org/10.1016/j.healthplace.2007.11.002>.
+
+Digital boundary files \| Australian Bureau of Statistics (2022). Available at: <https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files> (Accessed: 26 August 2022).
+
+EarthExplorer (2022). Available at: <https://earthexplorer.usgs.gov/> (Accessed: 26 August 2022). Engelberg, J.K. et al. (2016) 'Socioeconomic and race/ethnic disparities in observed park quality', BMC Public Health, 16(1), p. 395. Available at: <https://doi.org/10.1186/s12889-016-3055-4>.
+
+Gibson, (2021). Access To Green Space Has Never Been Just Or Equal (no date). Available at: <https://www.refinery29.com/en-au/access-green-space-australia> (Accessed: 26 August 2022).
+
+Green Space is Good for Mental Health (2019). NASA Earth Observatory. Available at: <https://earthobservatory.nasa.gov/images/145305/green-space-is-good-for-mental-health> (Accessed: 26 August 2022).
+
+Hoffimann, E., Barros, H. and Ribeiro, A.I. (2017) 'Socioeconomic Inequalities in Green Space Quality and Accessibility---Evidence from a Southern European City', International Journal of Environmental Research and Public Health, 14(8), p. 916. Available at: <https://doi.org/10.3390/ijerph14080916>.
+
+Jerrim, J. (2020) 'Measuring socio-economic background using administrative data. What is the best proxy available?'. Social Research Institute, University College London. Working Paper No. 20-09.
+
+Karnieli, A., Agam, N., Pinker, R. T., Anderson, M., Imhoff, M. L., Gutman, G. G., Panov, N. and Goldberg, A. (2010) 'Use of NDVI and land surface temperature for drought assessment: Merits and limitations', Journal of climate, 23(3), pp. 618-633.
+
+Knipling, E. B. (1970) 'Physical and physiological basis for the reflectance of visible and nearinfrared radiation from vegetation', Remote sensing of environment, 1(3), pp. 155- 159
+
+Macintyre, S. (2007) 'Deprivation amplification revisited; or, is it always true that poorer places have poorer access to resources for healthy diets and physical activity?', International Journal of Behavioral Nutrition and Physical Activity, 4(1), p. 32. Available at: <https://doi.org/10.1186/1479-5868-4-32>.
+
+Measuring Vegetation (NDVI & EVI) (2000). NASA Earth Observatory. Available at: <https://earthobservatory.nasa.gov/features/MeasuringVegetation> (Accessed: 26 August 2022).
+
+Moffitt (2019) Finding Natural Breaks in Data with the Fisher-Jenks Algorithm - Practical Business Python. Available at: <https://pbpython.com/natural-breaks.html> (Accessed: 26 August 2022).
+
+Pettorelli, N., Vik, J. O., Mysterud, A., Gaillard, J.-M., Tucker, C. J. and Stenseth, N. C. (2005) 'Using the satellite-derived NDVI to assess ecological responses to environmental change', Trends in ecology & evolution, 20(9), pp. 503-510.
+
+Ruijsbroek, A. et al. (2017) 'Does the Health Impact of Exposure to Neighbourhood Green Space Differ between Population Groups? An Explorative Study in Four European Cities', International Journal of Environmental Research and Public Health, 14(6), p. 618. Available at: <https://doi.org/10.3390/ijerph14060618>.
+
+Runkle, E. (2016) 'Red Light and Plant Growth', Michigan State University Extantion Floriculture Team.
+
+Statistical Area Level 2 \| Australian Bureau of Statistics (2021). Available at: <https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/main-structure-and-greater-capital-city-statistical-areas/statistical-area-level-2> (Accessed: 26 August 2022).
+
+THE 17 GOALS \| Sustainable Development (2018). Available at: <https://sdgs.un.org/goals> (Accessed: 26 August 2022).
+
+Xu, C. et al. (2018) 'Spatial variation of green space equity and its relation with urban dynamics: A case study in the region of Munich', Ecological Indicators, 93, pp. 512--523. Available at: <https://doi.org/10.1016/j.ecolind.2018.05.024>.
+
+Xue, J. and Su, B. (2017) 'Significant remote sensing vegetation indices: A review of developments and applications', Journal of Sensors, 2017.
+
+------------------------------------------------------------------------
